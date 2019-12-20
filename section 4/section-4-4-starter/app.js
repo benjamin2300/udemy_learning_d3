@@ -15,6 +15,7 @@ var svg = d3.select('#chart')
             .append('svg')
             .attr('width', chart_width)
             .attr('height', chart_height);
+            
 
 svg.selectAll('circle')
    .data(data)
