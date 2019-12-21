@@ -1,6 +1,6 @@
 var data = [];
 
-for(var i=0; i<5; i++){
+for(var i=0; i<20; i++){
   // Math.round()
   // var num = Math.floor(Math.random() * 50);
   var num = Math.floor(d3.randomUniform(1, 50)());
