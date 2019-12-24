@@ -31,17 +31,6 @@ var y_scale         =   d3.scaleLinear()
     })])
     .range([ chart_height - padding, padding ]);
 
-var r_scale         =   d3.scaleLinear()
-    .domain([0, d3.max(data, function( d ){
-        return d[1];
-    })])
-    .range([5, 30]);
-
-var a_scale         =   d3.scaleSqrt()
-    .domain([ 0, d3.max(data, function(d) {
-        return d[1];
-    })])
-    .range([ 0, 25 ]);
 
 // Create Axis
 var x_axis          =   d3.axisBottom( x_scale );
@@ -76,36 +65,48 @@ svg.selectAll( 'circle' )
     .attr("cy", function(d) {
         return y_scale(d[1]);
     })
-    .attr("r", function(d){
-        return a_scale(d[1]);
-    })
+    .attr("r", 15)
     .attr( 'fill', '#D1AB0E' );
 
-// Create Labels
-svg.append( 'g' ).selectAll( 'text' )
-    .data( data )
-    .enter()
-    .append( 'text' )
-    .text(function(d) {
-        return d.join( ',' );
-    })
-    .attr("x", function(d) {
-        return x_scale(d[0]);
-    })
-    .attr("y", function(d) {
-        return y_scale(d[1]);
-    });
-
+// Events
 d3.select('button').on('click', function(){
     // Create Random Data
     data = [];
     var max_num = Math.random() * 1000;
     
     for(var i=0; i<8; i++){
-        var new_x = Math.floor( Math.random * max_num );
-        var new_y = Math.floor( Math.random * max_num );
+        var new_x = Math.floor( Math.random() * max_num );
+        var new_y = Math.floor( Math.random() * max_num );
         data.push([new_x, new_y]);
     }
 
     // Update Scales
+    x_scale.domain([0, d3.max(data, function(d){
+        return d[0];
+    })])
+
+    y_scale.domain([0, d3.max(data, function(d){
+        return d[1];
+    })])
+
+    svg.selectAll('circle')
+        .data(data)
+        .transition()
+        .duration(1000)
+        .attr("cx", function(d) {
+            return x_scale(d[0]);
+        })
+        .attr("cy", function(d) {
+            return y_scale(d[1]);
+        });
+    // Update Axis
+    svg.select('.x-axis')
+        .transition()
+        .duration(1000)
+        .call(x_axis);
+
+    svg.select('.y-axis')
+        .transition()
+        .duration(1000)
+        .call(y_axis);
 })
