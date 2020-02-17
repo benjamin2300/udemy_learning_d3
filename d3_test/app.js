@@ -1,85 +1,71 @@
-// Data
-var data            =   [
-    { date: 1988, num: 51 }, { date: 1989, num: 60 },
-    { date: 1990, num: 62 }, { date: 1991, num: -64 },
-    { date: 1992, num: 69 }, { date: 1993, num: 69 },
-    { date: 1994, num: 75 }, { date: 1995, num: 80 },
-    { date: 1996, num: 91 }, { date: 1997, num: 93 },
-    { date: 1998, num: 97 }, { date: 1999, num: 100 },
-    { date: 2000, num: -103 }, { date: 2001, num: 104 },
-    { date: 2002, num: 105 }, { date: 2003, num: 110 },
-    { date: 2004, num: 111 }, { date: 2005, num: 112 },
-    { date: 2006, num: 112 }, { date: 2007, num: 113 },
-    { date: 2008, num: 119 }, { date: 2009, num: 128 },
-    { date: 2010, num: 139 }, { date: 2011, num: -139 },
-    { date: 2012, num: 139 }, { date: 2013, num: 140 },
-    { date: 2014, num: 143 }, { date: 2015, num: 146 },
-    { date: 2016, num: 147 }, { date: 2017, num: 149 }
-];
-var time_parse      =   d3.timeParse( '%Y' );
-var time_format     =   d3.timeFormat( '%Y' );
-var chart_width     =   1000;
-var chart_height    =   800;
-var padding         =   50;
+var width = 450;
+var height = 450;
+var padding = 40;
 
-// Format Date
-data.forEach(function(e, i){
-    data[i].date    =   time_parse(e.date);
-});
+var radius = width / 2 - padding;
 
-// Scales
-var x_scale         =   d3.scaleTime()
-    .domain([
-        d3.min(data, function(d) {
-            return d.date;
-        }),
-        d3.max(data, function(d) {
-            return d.date;
-        })
-    ])
-    .range([padding, chart_width - padding]);
-var y_scale         =   d3.scaleLinear()
-    .domain([
-        0, d3.max(data, function(d) {
-            return d.num;
-        })
-    ])
-    .range([chart_height - padding, padding]);
+var svg = d3.select("#chart")
+	.append("svg")
+	.attr("width", width)
+	.attr("height", height)
+	.append("g")
+	.attr("transform", "translate(" + width / 2 + ", " + height / 2 + ")");
 
-// Create SVG
-var svg             =   d3.select("#chart")
-    .append("svg")
-    .attr("width", chart_width)
-    .attr("height", chart_height);
+var data = [
+	{
+		key: 0,
+		slice: 1,
+		value: 2,
+	},
+	{
+		key: 1,
+		slice: 1,
+		value: 10,
+	},{
+		key: 2,
+		slice: 1,
+		value: 7,
+	},{
+		key: 3,
+		slice: 1,
+		value: 9,
+	},{
+		key: 4,
+		slice: 1,
+		value: 2,
+	},{
+		key: 5,
+		slice: 1,
+		value: 8,
+	}
+]
 
-// Create Axes
-var x_axis          =   d3.axisBottom(x_scale)
-    .ticks(10)
-    .tickFormat(time_format);
-var y_axis          =   d3.axisLeft(y_scale)
-    .ticks(12);
-svg.append("g")
-    .attr("transform", "translate(0," + (chart_height - padding) + ")")
-    .call(x_axis);
-svg.append("g")
-    .attr("transform", "translate(" + padding + ",0)")
-    .call(y_axis);
+var pie = d3.pie()
+		.value(function(d){	
+			return d.slice;
+		})
 
-// Create Line
-var line = d3.line()
-    .defined(function(d){
-        return d.num >= 0;
-    })
-    .x(function(d){
-        return x_scale(d.date);
-    })
-    .y(function(d){
-        return y_scale(d.num);
-    });
+var r_scale = d3.scaleLinear()
+		.domain([
+			0, d3.max(data, function(d){
+				return d.value;
+			})
+		])
+		.range([0, radius]);
 
-svg.append( 'path' )
-        .datum( data )
-        .attr( 'fill', 'none' )
-        .attr( 'stroke', '#73FF36')
-        .attr( 'stroke-width', 5)
-        .attr( 'd', line );
+var arc = d3.arc()       
+		.innerRadius(0)      //this will create <path> elements for us using arc data
+		.outerRadius(function(d, i){
+			// console.log(d.data.value);
+			
+			return r_scale(d.data.value);
+		});
+
+var arcs = svg.selectAll(".slice")
+		.data(pie(data))
+		.enter()
+		.append("g")
+		.attr("class", "slice")
+		.append("path")
+		.attr("fill", "#98abc5")
+		.attr("d", arc);
